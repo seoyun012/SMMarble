@@ -21,7 +21,19 @@ typedef enum smmObjType {
     smmObjType_board = 0,
     smmObjType_card,
     smmObjType_grade
-} smmObjType_e;
+} smmObjType_e; //smmObjType_e, object generation에서 오류 안나게 먼저 정의 
+
+typedef enum smmObjGrade {
+    smmObjGrade_Ap = 0,
+    smmObjGrade_A0,
+    smmObjGrade_Am,
+    smmObjGrade_Bp,
+    smmObjGrade_B0,
+    smmObjGrade_Bm,
+    smmObjGrade_Cp,
+    smmObjGrade_C0,
+    smmObjGrade_Cm
+} smmObjGrade_e; //smmObjGrade_e, object generation에서 오류 안나게 먼저 정의 
 
 /* node type :
     lecture,
@@ -47,7 +59,7 @@ typedef enum smmObjType {
 */
 
 //object generation
-void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjType_e objGrade);
+void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjGrade_e grade); 
 //member retrieving
 char* smmObj_getNodeName(void* obj);
 int smmObj_getNodeType(void* obj);
@@ -56,6 +68,6 @@ int smmObj_getNodeEnergy(void* obj);
 
 //element to string
 char* smmObj_getTypeName(int type);
-
+char* smmObj_getNodeGrade(int grade);
 
 #endif /* smm_object_h */

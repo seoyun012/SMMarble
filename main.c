@@ -171,11 +171,11 @@ int main(int argc, const char * argv[]) {
     
     //1. import parameters ---------------------------------------------------------------------------------
     //1-1. boardConfig 
-    if ((fp = fopen(BOARDFILEPATH,"r")) == NULL)
+    if ((fp = fopen(BOARDFILEPATH,"r")) == NULL) 
     {
-        printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", BOARDFILEPATH);
+        printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", BOARDFILEPATH); 
         getchar();
-        return -1;
+        return -1; 
     }
     
     printf("Reading board component......\n");
@@ -201,40 +201,67 @@ int main(int argc, const char * argv[]) {
     printf("(%s)", smmObj_getTypeName(SMMNODE_TYPE_LECTURE));
 }
 //printf("(%s)", smmObj_getTypeName(SMMNODE_TYPE_LECTURE));
-    #if 0
+    
     //2. food card config 
-    if ((fp = fopen(FOODFILEPATH,"r")) == NULL)
+    if ((fp = fopen(FOODFILEPATH,"r")) == NULL) //음식 파일을 읽기 모드로 연다 
     {
-        printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", FOODFILEPATH);
+        printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", FOODFILEPATH); //파일 열리지 않으면 오류메세지 출력  
         return -1;
     }
     
     printf("\n\nReading food card component......\n");
-    while () //read a food parameter set
+    while (fscanf(fp, "%s %i", &name, &energy) == 2) //read a food parameter set
     {
+    	void *foodObj = smmObj_genObject(name, smmObjType_card, 0, 0, energy, 0); //읽은 parameter set 사용해 foodObj 생성 
+        smmdb_addTail(LISTNO_FOODCARD, foodObj); //foodObj를 LISTNO_FOODCARD에 추가  
+        
+
+		food_nr++;
         //store the parameter set
     }
-    fclose(fp);
-    printf("Total number of food cards : %i\n", food_nr);
+    fclose(fp); //음식 카드 파일 닫기 
+    printf("Total number of food cards : %i\n", food_nr); //음식카드 총 개수  
     
-    
-    
-    //3. festival card config 
-    if ((fp = fopen(FESTFILEPATH,"r")) == NULL)
+    //각 음식 카드 정보 표시  
+    for (i=0; i<food_nr; i++)
     {
-        printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", FESTFILEPATH);
+       void *foodObj = smmdb_getData(LISTNO_FOODCARD, i); 
+      printf("node %i : %s, energy %i\n", i,  smmObj_getNodeName(foodObj), smmObj_getNodeEnergy(foodObj)); //음식 카드엔 정보가 이름과 에너지 둘 뿐  
+    
+    //SMMNODE_TYPE_FOODCHANCE에 대한 유형 이름 표시  
+    printf("(%s)", smmObj_getTypeName(SMMNODE_TYPE_FOODCHANCE));
+}
+   
+    //3. festival card config 
+    if ((fp = fopen(FESTFILEPATH,"r")) == NULL) //페스티벌 카드를 읽기 모드로  연다  
+    {
+        printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", FESTFILEPATH); //파일 열리지 않으면 오류메세지 출력  
         return -1;
     }
     
     printf("\n\nReading festival card component......\n");
-    while () //read a festival card string
+    while (fscanf(fp, "%s", &name) == 1) //read a festival card string
     {
+    	void *festObj = smmObj_genObject(name, smmObjType_card, 0, 0, 0, 0); //읽은 parameter set 사용해 festObj 생성 
+        smmdb_addTail(LISTNO_FESTCARD, festObj); //festObj를 LISTNO_FESTCARD에 추가 
+		
+		festival_nr++;
+    
         //store the parameter set
     }
-    fclose(fp);
-    printf("Total number of festival cards : %i\n", festival_nr);
+    fclose(fp); //페스티벌 카드 파일 닫기
+    printf("Total number of festival cards : %i\n", festival_nr); //페스티벌 카드 총 개수  
     
-    #endif
+    //각 페스티벌 카드 정보 표시 
+     for (i=0; i<festival_nr; i++)
+    {
+       void *festObj = smmdb_getData(LISTNO_FESTCARD, i); 
+      printf("node %i : %s\n", i,  smmObj_getNodeName(festObj)); //페스티벌  카드엔 정보가 미션이름 뿐  
+    
+    //SMMNODE_TYPE_FESTIVAL에 대한 유형 이름 표시  
+    printf("(%s)", smmObj_getTypeName(SMMNODE_TYPE_FESTIVAL));
+}
+   
     
     //2. Player configuration ---------------------------------------------------------------------------------
  
