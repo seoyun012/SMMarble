@@ -63,6 +63,8 @@ void printPlayerStatus(void)
 {
    int i;
    
+   printf("\n<This turn player status>\n"); //player status 사이 간격이 없어 번잡해 보여서 만듦  
+   
    for(i=0; i<player_nr; i++)
    {
       printf("%s : credit %i, energy %i, position %i\n", cur_player[i].name, cur_player[i].accumCredit, cur_player[i].energy, cur_player[i].position);
@@ -96,7 +98,7 @@ void generatePlayers(int n, int initEnergy) //generate a new player
 int rolldie(int player)
 {
     char c;
-    printf(" Press any key to roll a die (press g to see grade): ");
+    printf("\n Press any key to roll a die (press g to see grade): ");
     c = getchar();
     fflush(stdin);
     
@@ -120,17 +122,52 @@ void actionNode(int player)
    
     switch(type)
     {
-        //case lecture:
+        //case lecture1:
         case SMMNODE_TYPE_LECTURE:
-           if
-             (cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr));
-             cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
-             
-              //grade generation
-            gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit( boardPtr ), 0, 0);
-            smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
-             break;
-             
+           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr)) //현 에너지가 소요 에너지 이상이고 전에 강의 들은 적 없을 때  
+            { 
+			    cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
+                cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
+                     
+                //grade generation
+                gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, 0);
+                smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
+			}
+            else
+			printf("Current energy is not enough. Take this lecture next time.\n"); //에너지가 부족해 들을 수 없을 때 출력  
+			      
+            break;
+        
+        
+		//case laboratory:
+	    case SMMNODE_TYPE_LABORATORY:
+		   if
+		   (cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr)); //실험실에서는 에너지가 사용됨 
+		   
+		   break;
+		
+		//case restaurant:
+	    case SMMNODE_TYPE_RESTAURANT:
+		   if
+		   (cur_player[player].energy += smmObj_getNodeEnergy(boardPtr)); //식당, 카페에서는 에너지가 충전됨  
+		   
+		   break;
+		
+		//case home:
+	    case SMMNODE_TYPE_HOME:
+	       if
+		   (cur_player[player].energy += smmObj_getNodeEnergy(boardPtr)); //집에서는 에너지가 충전됨  
+		   
+		   break;
+		   
+		//case gotolab:
+		case SMMNODE_TYPE_GOTOLAB:
+		    if 
+			(cur_player[player].position = SMMNODE_TYPE_LABORATORY); //실험실로 이동 -> Node 2로 이동해서 수정필요함  
+		    printf("%s가 실험실로 이동했습니다.\n", cur_player[player].name); //실험실로 이동했다는 메세지 출력
+    
+		   break; 
+		         
         default:
             break;
     }
@@ -267,6 +304,8 @@ int main(int argc, const char * argv[]) {
         //input player number to player_nr
         printf("input player no.:");
         scanf("%d", &player_nr);
+        
+        printf("\n"); //간격 위해  
         fflush(stdin);
     }
     while (player_nr < 0 || player_nr > MAX_PLAYER);

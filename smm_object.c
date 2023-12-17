@@ -120,7 +120,7 @@ char* smmObj_getNameofType(smmNode_e type)  //이름 중복오류로  getTypeName을 get
     return smmObj_getTypeName(type);
 }
 
-char* smmObj_getNodeGrade(smmObjGrade_e grade)
+char* smmObj_getNodeGrade(smmObjGrade_e grade) 
 {
     return smmObj_getNodeGrade(grade);
 }

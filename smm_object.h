@@ -56,6 +56,5 @@ int smmObj_getNodeEnergy(void* obj);
 
 //element to string
 char* smmObj_getTypeName(int type);
-char* smmObj_getNodeGrade(int grade);
 
 #endif /* smm_object_h */
