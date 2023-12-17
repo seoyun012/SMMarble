@@ -48,6 +48,7 @@ smmGrade_e takeLecture(int player, char *lectureName, int credit); //take the le
 void* findGrade(int player, char *lectureName); //find the grade from the player's grade history
 #endif
 
+
 void printGrades(int player)
 {
    int i;
@@ -122,16 +123,32 @@ void actionNode(int player)
    
     switch(type)
     {
-        //case lecture1:
+        //case lecture:
         case SMMNODE_TYPE_LECTURE:
-           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr)) //현 에너지가 소요 에너지 이상이고 전에 강의 들은 적 없을 때  
+           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr)) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
             { 
-			    cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr);
-                cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr);
+                //강의 수강할지 드랍할지 선택 숫자 1 입력하면 수강, 아니면 드랍  
+                int reply;
+                printf("If you want to take a lecture, enter number 1 key: ");
+                scanf("%i", &reply);
+                    //수강을 선택했을 때(숫자 1 입력했을 때)  
+                    if(reply == 1)
+					{
+                      cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr); //학점은 들은 수강과목 학점만큼 쌓임  
+                      cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr); //수강하면서 에너지는 소모됨  
+                      //수강 후 완료메세지 출력  
+                      printf("The lecture has been completed!! Thank you for your hard work!\n");
                      
-                //grade generation
-                gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, 0);
-                smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
+                      //grade generation
+                      gradePtr = smmObj_genObject(name, smmObjType_grade, 0, smmObj_getNodeCredit(boardPtr), 0, 0);
+                      smmdb_addTail(LISTNO_OFFSET_GRADE + player, gradePtr);
+                    }
+                  
+                    else
+                    {
+                      printf("You dropped this lecture.\n");
+                    }
+			   
 			}
             else
 			printf("Current energy is not enough. Take this lecture next time.\n"); //에너지가 부족해 들을 수 없을 때 출력  
@@ -167,6 +184,35 @@ void actionNode(int player)
 		    printf("%s가 실험실로 이동했습니다.\n", cur_player[player].name); //실험실로 이동했다는 메세지 출력
     
 		   break; 
+		
+		//case foodchance:
+		case SMMNODE_TYPE_FOODCHANCE: 
+		{
+			//음식카드 랜덤 뽑기 
+			 int randomFoodCard = rand() % food_nr;
+             void *foodCardPtr = smmdb_getData(LISTNO_FOODCARD, randomFoodCard);
+             int foodEnergy = smmObj_getNodeEnergy(foodCardPtr);
+
+            //음식 에너지를 현재 에너지에 추가  
+            cur_player[player].energy += foodEnergy;
+            //플레이어가 음식 카드 뽑은 후의 에너지를 출력   
+            printf("%s picked up a food card '%s' and got energy %i. %s's Current energy: %i\n", cur_player[player].name, smmObj_getNodeName(foodCardPtr), foodEnergy, cur_player[player].name, cur_player[player].energy);
+            
+            break;
+	    }
+	    
+		//case festival:   
+		case SMMNODE_TYPE_FESTIVAL: 
+		{
+			//페스티벌카드 랜덤 뽑기 
+			 int randomFestCard = rand() % festival_nr;
+             void *festCardPtr = smmdb_getData(LISTNO_FESTCARD, randomFestCard);
+            
+            //플레이어가 페스티벌 카드 뽑은 후 미션 완료 메세지 출력  
+            printf("%s picked up a festival card '%s' and completed mission.\n", cur_player[player].name, smmObj_getNodeName(festCardPtr));
+            
+            break;
+	    }
 		         
         default:
             break;
@@ -329,12 +375,14 @@ int main(int argc, const char * argv[]) {
         //4-3. go forward
         goForward(turn, die_result);
 
-      //4-4. take action at the destination node of the board
+        //4-4. take action at the destination node of the board
         actionNode(turn);
         
         //4-5. next turn
         turn = (turn + 1)%player_nr;    
     }
+    
+    //4. SM Marble game ends -----------------------------------------------------------------------------------
     
     free(cur_player);
     system("PAUSE");
