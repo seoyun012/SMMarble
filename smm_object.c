@@ -37,8 +37,19 @@ typedef enum smmNode{
     gotolab,
     foodChance,
     festival
-} smmNode_e;
+} smmNode_e; 
 
+typedef enum smmObjGrade {
+    smmObjGrade_Ap = 0,
+    smmObjGrade_A0,
+    smmObjGrade_Am,
+    smmObjGrade_Bp,
+    smmObjGrade_B0,
+    smmObjGrade_Bm,
+    smmObjGrade_Cp,
+    smmObjGrade_C0,
+    smmObjGrade_Cm
+} smmObjGrade_e;
 
 
 //1. 구조체 형식 정의
@@ -57,7 +68,7 @@ typedef struct smmObject {
 
 //3. 관련 함수 변경 
 //object generation
-void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjGrade_e grade)
+void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjType_e grade)
 {
     smmObject_t* ptr;
     
@@ -104,7 +115,7 @@ int smmObj_getNodeEnergy(void* obj)
 
 
 //element to string
-char* smmObj_getNameofType(smmNode_e type)  //이름 중복오류로 getTypeName을 getNameofType로 수정 
+char* smmObj_getNameofType(smmNode_e type)  //이름 중복오류로  getTypeName을 getNameofType로 수정 
 {
     return smmObj_getTypeName(type);
 }

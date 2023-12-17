@@ -43,13 +43,9 @@ static int player_name[MAX_PLAYER][MAX_CHARNAME];
 //function prototypes
 #if 0
 int isGraduated(void); //check if any player is graduated
-//print grade history of the player
-void goForward(int player, int step); //make player go "step" steps on the board (check if player is graduated)
-void printPlayerStatus(void); //print all player status at the beginning of each turn
 float calcAverageGrade(int player); //calculate average grade of the player
 smmGrade_e takeLecture(int player, char *lectureName, int credit); //take the lecture (insert a grade of the player)
 void* findGrade(int player, char *lectureName); //find the grade from the player's grade history
-void printGrades(int player); //print all the grade history of the player
 #endif
 
 void printGrades(int player)
