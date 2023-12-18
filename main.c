@@ -56,20 +56,18 @@ int isGraduated(void)  //check if any player is graduated
     for (i = 0; i < player_nr; i++)
     {
         // 만약 플레이어 i가 집 노드로 이동하면 학점 확인
-        if (cur_player[i].position == SMMNODE_TYPE_HOME)
+        if (cur_player[i].position == 0)
         {
             // 만약 플레이어의 학점이 Graduate_credit 이상이면 
             if (cur_player[i].accumCredit >= GRADUATE_CREDIT)
             {
-            	//printf("%s 수강강의 이름, 학점, 성적 출력")
-                printf("Player %s has graduated! Game Over.\n", cur_player[i].name);
-                return 1;  // 게임 종료
+                return i;  // 졸업한 플레이어 반환  -> 코드 변경 필요해보임  
             }
         }
     }
 
-    // 모든 플레이어가 아직 졸업 조건을 만족하지 않으면 게임 계속 진행
-    return 0;
+    // 모든 플레이어가 아직 졸업 조건을 만족하지 않았다면 
+    return -1; 
 }
 
 
@@ -150,7 +148,7 @@ void actionNode(int player)
     {
         //case lecture:
         case SMMNODE_TYPE_LECTURE:
-           if ((cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr))&&(cur_player[player].hasTakenLecture == 0)) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
+           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr)) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
             { 
                 //강의 수강할지 드랍할지 선택 숫자 1 입력하면 수강, 아니면 드랍  
                 int reply;
@@ -247,13 +245,31 @@ void actionNode(int player)
 
 void goForward(int player, int step)
 {
-   void *boardPtr;
-   cur_player[player].position += step;
-   boardPtr = smmdb_getData(LISTNO_NODE, cur_player[player].position);
-   
-   printf("%s go to node %i (name: %s)\n", cur_player[player].name, cur_player[player].position, smmObj_getNodeName(boardPtr));
+    int gameEnd = 0;  //게임종료 구분 
+	int nodeTotalNum = 16;  // 노드 총 개수  
+	void *boardPtr;
+	
+	while(!gameEnd)  //게임 종료 되기 전까지 반복 
+	{
+     	cur_player[player].position += step;
+     	
+     	//플레이어가 총 노드 수 16을 넘기면  
+     	if (cur_player[player].position >= nodeTotalNum)
+        {   
+		    //나머지 연산을 통해 위치를 처음 턴처럼 되돌림   
+            cur_player[player].position %= nodeTotalNum;   
+        }
+        
+        boardPtr = smmdb_getData(LISTNO_NODE, cur_player[player].position );
+        
+     	printf("%s go to node %i (name: %s)\n", cur_player[player].name, cur_player[player].position, smmObj_getNodeName(boardPtr));
+					
+		if(isGraduated())  //졸업한 플레이어가 존재하면  -> 코드 변경 필요해보임  
+		{
+			gameEnd = 1;  //while문 끝, 게임 종료되어야  
+		} 	
+	}                
 }
-
 
 
 int main(int argc, const char * argv[]) {
@@ -403,13 +419,8 @@ int main(int argc, const char * argv[]) {
 
         //4-4. take action at the destination node of the board
         actionNode(turn);
-        
-        //4-5. check if any player is graduated
-        if (isGraduated()){
-        break; // exit the loop if any player has graduated
-        }
 
-        //4-6. next turn
+        //4-5. next turn
         turn = (turn + 1)%player_nr;    
     }
     
