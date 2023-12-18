@@ -30,6 +30,7 @@ typedef struct player {
    char name[MAX_CHARNAME];
    int accumCredit;
    int flag_graduate;
+   int hasTakenLecture; //이전에 강의 들은 적 있는지 체크  
 } player_t;
 
 static player_t *cur_player;
@@ -91,6 +92,7 @@ void generatePlayers(int n, int initEnergy) //generate a new player
       cur_player[i].energy = initEnergy;
       cur_player[i].accumCredit = 0;
       cur_player[i].flag_graduate =0;
+      cur_player[i].hasTakenLecture =0; //강의 들은 적 없는 것으로 초기화  
    }
    
 }
@@ -125,7 +127,7 @@ void actionNode(int player)
     {
         //case lecture:
         case SMMNODE_TYPE_LECTURE:
-           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr)) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
+           if ((cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr))&&(cur_player[player].hasTakenLecture == 0)) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
             { 
                 //강의 수강할지 드랍할지 선택 숫자 1 입력하면 수강, 아니면 드랍  
                 int reply;
@@ -136,6 +138,7 @@ void actionNode(int player)
 					{
                       cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr); //학점은 들은 수강과목 학점만큼 쌓임  
                       cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr); //수강하면서 에너지는 소모됨  
+                      cur_player[player].hasTakenLecture = 1; //강의 들음 표시  
                       //수강 후 완료메세지 출력  
                       printf("The lecture has been completed!! Thank you for your hard work!\n");
                      
@@ -180,8 +183,8 @@ void actionNode(int player)
 		//case gotolab:
 		case SMMNODE_TYPE_GOTOLAB:
 		    if 
-			(cur_player[player].position = SMMNODE_TYPE_LABORATORY); //실험실로 이동 -> Node 2로 이동해서 수정필요함  
-		    printf("%s가 실험실로 이동했습니다.\n", cur_player[player].name); //실험실로 이동했다는 메세지 출력
+			(cur_player[player].position = 8); //전자공학실험실, position 8 로 이동
+		    printf("It is 실험시간. %s go to node %i, 전자공학실험실.\n", cur_player[player].name, cur_player[player].position); //실험실로 이동했다는 메세지 출력
     
 		   break; 
 		

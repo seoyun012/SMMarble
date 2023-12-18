@@ -24,10 +24,6 @@ static char smmNodeName[SMMNODE_TYPE_MAX][MAX_CHARNAME] = {
 	"festival"
 };
 
-char* smmObj_getTypeName(int type)
-{
-	return (char*)smmNodeName[type];
-}
 
 typedef enum smmNode{
     lecture,
@@ -38,18 +34,6 @@ typedef enum smmNode{
     foodChance,
     festival
 } smmNode_e; 
-
-typedef enum smmObjGrade {
-    smmObjGrade_Ap = 0,
-    smmObjGrade_A0,
-    smmObjGrade_Am,
-    smmObjGrade_Bp,
-    smmObjGrade_B0,
-    smmObjGrade_Bm,
-    smmObjGrade_Cp,
-    smmObjGrade_C0,
-    smmObjGrade_Cm
-} smmObjGrade_e;
 
 
 //1. 구조체 형식 정의
@@ -68,7 +52,7 @@ typedef struct smmObject {
 
 //3. 관련 함수 변경 
 //object generation
-void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjType_e grade)
+void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, int energy, smmObjGrade_e grade)
 {
     smmObject_t* ptr;
     
@@ -85,13 +69,14 @@ void* smmObj_genObject(char* name, smmObjType_e objType, int type, int credit, i
 }
 
 //3. 관련 함수 변경 
+//member retrieving
 char* smmObj_getNodeName(void* obj)
 {
 	smmObject_t* ptr = (smmObject_t*)obj;
 	return ptr->name;
 }
 
-//3. 관련 함수 변경 
+//위와 같이 전부 변  
 int smmObj_getNodeType(void* obj)
 {
 	smmObject_t* ptr = (smmObject_t*)obj;
@@ -111,16 +96,13 @@ int smmObj_getNodeEnergy(void* obj)
 }
 
 
-//member retrieving
-
-
 //element to string
-char* smmObj_getNameofType(smmNode_e type)  //이름 중복오류로  getTypeName을 getNameofType로 수정 
+char* smmObj_getTypeName(int type)
 {
-    return smmObj_getTypeName(type);
+    return (char*)smmNodeName[type];
 }
 
 char* smmObj_getNodeGrade(smmObjGrade_e grade) 
 {
-    return smmObj_getNodeGrade(grade);
+    return smmObj_getNodeGrade(grade); 
 }
