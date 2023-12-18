@@ -24,16 +24,17 @@ static char smmNodeName[SMMNODE_TYPE_MAX][MAX_CHARNAME] = {
 	"festival"
 };
 
-
-typedef enum smmNode{
-    lecture,
-    restaurant,
-    laboratory,
-    home,
-    gotolab,
-    foodChance,
-    festival
-} smmNode_e; 
+static char smmGradeName[SMMNODE_GRADE_MAX][MAX_CHARNAME] = {
+	"A+",
+	"A0",
+	"A-",
+	"B+",
+	"B0",
+	"B-",
+	"C+",
+	"C0",
+	"C-"
+};
 
 
 //1. 구조체 형식 정의
@@ -76,7 +77,7 @@ char* smmObj_getNodeName(void* obj)
 	return ptr->name;
 }
 
-//위와 같이 전부 변  
+//위와 같이 전부 변경   
 int smmObj_getNodeType(void* obj)
 {
 	smmObject_t* ptr = (smmObject_t*)obj;
@@ -102,7 +103,11 @@ char* smmObj_getTypeName(int type)
     return (char*)smmNodeName[type];
 }
 
-char* smmObj_getNodeGrade(smmObjGrade_e grade) 
+
+char* smmObj_getNodeGrade(void* obj) 
 {
-    return smmObj_getNodeGrade(grade); 
-}
+    //등급을 랜덤으로 반환   
+    int randomIndex = rand() % SMMNODE_GRADE_MAX; 
+    return (char*)smmGradeName[randomIndex];
+} 
+

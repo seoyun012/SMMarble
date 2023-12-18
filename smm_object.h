@@ -17,6 +17,19 @@
 
 #define SMMNODE_TYPE_MAX            7
 
+
+#define SMMNODE_GRADE_Ap            0
+#define SMMNODE_GRADE_A0            1
+#define SMMNODE_GRADE_Am            2
+#define SMMNODE_GRADE_Bp            3
+#define SMMNODE_GRADE_B0            4
+#define SMMNODE_GRADE_Bm            5
+#define SMMNODE_GRADE_Cp            6
+#define SMMNODE_GRADE_C0            7
+#define SMMNODE_GRADE_Cm            8
+
+#define SMMNODE_GRADE_MAX           9
+
 typedef enum smmObjType {
     smmObjType_board = 0,
     smmObjType_card,
@@ -70,5 +83,6 @@ int smmObj_getNodeEnergy(void* obj);
 
 //element to string
 char* smmObj_getTypeName(int type);
- 
+char* smmObj_getNodeGrade(void* obj);
+
 #endif /* smm_object_h */

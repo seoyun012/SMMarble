@@ -43,11 +43,34 @@ static int player_name[MAX_PLAYER][MAX_CHARNAME];
 
 //function prototypes
 #if 0
-int isGraduated(void); //check if any player is graduated
 float calcAverageGrade(int player); //calculate average grade of the player
 smmGrade_e takeLecture(int player, char *lectureName, int credit); //take the lecture (insert a grade of the player)
 void* findGrade(int player, char *lectureName); //find the grade from the player's grade history
 #endif
+
+
+int isGraduated(void)  //check if any player is graduated
+{
+	int i;
+
+    for (i = 0; i < player_nr; i++)
+    {
+        // 만약 플레이어 i가 집 노드로 이동하면 학점 확인
+        if (cur_player[i].position == SMMNODE_TYPE_HOME)
+        {
+            // 만약 플레이어의 학점이 Graduate_credit 이상이면 
+            if (cur_player[i].accumCredit >= GRADUATE_CREDIT)
+            {
+            	//printf("%s 수강강의 이름, 학점, 성적 출력")
+                printf("Player %s has graduated! Game Over.\n", cur_player[i].name);
+                return 1;  // 게임 종료
+            }
+        }
+    }
+
+    // 모든 플레이어가 아직 졸업 조건을 만족하지 않으면 게임 계속 진행
+    return 0;
+}
 
 
 void printGrades(int player)
@@ -57,7 +80,7 @@ void printGrades(int player)
    for(i=0; i<smmdb_len(LISTNO_OFFSET_GRADE + player); i++)
    {
       gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + player, i);
-      printf("%s : %i\n", smmObj_getNodeName(gradePtr), smmObj_getNodeGrade(gradePtr));
+      printf("%s : %s\n", smmObj_getNodeName(gradePtr), smmObj_getNodeGrade(gradePtr)); //등급을 출력해야하므로 %i -> %s로 변경  
    }
 }
 
@@ -198,7 +221,7 @@ void actionNode(int player)
 
             //음식 에너지를 현재 에너지에 추가  
             cur_player[player].energy += foodEnergy;
-            //플레이어가 음식 카드 뽑은 후의 에너지를 출력   
+            //플레이어가 음식 카드 뽑은 후의 에너지를 출력 
             printf("%s picked up a food card '%s' and got energy %i. %s's Current energy: %i\n", cur_player[player].name, smmObj_getNodeName(foodCardPtr), foodEnergy, cur_player[player].name, cur_player[player].energy);
             
             break;
@@ -312,7 +335,7 @@ int main(int argc, const char * argv[]) {
     
     //SMMNODE_TYPE_FOODCHANCE에 대한 유형 이름 표시  
     printf("(%s)", smmObj_getTypeName(SMMNODE_TYPE_FOODCHANCE));
-}
+    }
    
     //3. festival card config 
     if ((fp = fopen(FESTFILEPATH,"r")) == NULL) //페스티벌 카드를 읽기 모드로  연다  
@@ -381,7 +404,12 @@ int main(int argc, const char * argv[]) {
         //4-4. take action at the destination node of the board
         actionNode(turn);
         
-        //4-5. next turn
+        //4-5. check if any player is graduated
+        if (isGraduated()){
+        break; // exit the loop if any player has graduated
+        }
+
+        //4-6. next turn
         turn = (turn + 1)%player_nr;    
     }
     
