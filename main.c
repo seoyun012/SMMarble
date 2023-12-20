@@ -15,8 +15,6 @@
 #define FOODFILEPATH "marbleFoodConfig.txt"
 #define FESTFILEPATH "marbleFestivalConfig.txt"
 
-
-
 //board configuration parameters
 static int board_nr;
 static int food_nr;
@@ -55,16 +53,17 @@ int isGraduated(void)  //check if any player is graduated
 
     for (i = 0; i < player_nr; i++)
     {
-        // 만약 플레이어 i가 집 노드로 이동하면 학점 확인
-        if (cur_player[i].position == 0)
+        // 만약 플레이어 i가 졸업이수학점을 획득한 상황에서 집 노드에 도착하면 졸업  
+        if (cur_player[i].accumCredit >= GRADUATE_CREDIT && cur_player[i].position == 0)
+        
         {
-            // 만약 플레이어의 학점이 Graduate_credit 이상이면 
-            if (cur_player[i].accumCredit >= GRADUATE_CREDIT)
-            {
-                return i;  // 졸업한 플레이어 반환  -> 코드 변경 필요해보임  
-            }
+            printf("%s is graduated! Congratulations!\n", cur_player[i].name); // 졸업한 플레이어 축하 메세지 출력 
+            printf("%s's total credit : %s\n", cur_player[i].name, cur_player[i].accumCredit); // 졸업한 플레이어의 총 학점, 들은 강의, 성적 출력  
+            cur_player[i].flag_graduate = 1; //졸업한 플레이어의 flag_graduate 설정
+			return i; // i를 반환  
         }
     }
+    
 
     // 모든 플레이어가 아직 졸업 조건을 만족하지 않았다면 
     return -1; 
@@ -148,7 +147,7 @@ void actionNode(int player)
     {
         //case lecture:
         case SMMNODE_TYPE_LECTURE:
-           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr)) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
+           if (cur_player[player].energy >= smmObj_getNodeEnergy(boardPtr) && cur_player[player].hasTakenLecture == 0) //현 에너지가 소요 에너지 이상이고 전에 (강의 들은 적 없을 때는 추가해야함)  
             { 
                 //강의 수강할지 드랍할지 선택 숫자 1 입력하면 수강, 아니면 드랍  
                 int reply;
@@ -159,7 +158,8 @@ void actionNode(int player)
 					{
                       cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr); //학점은 들은 수강과목 학점만큼 쌓임  
                       cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr); //수강하면서 에너지는 소모됨  
-                      cur_player[player].hasTakenLecture = 1; //강의 들음 표시  
+                      cur_player[player].hasTakenLecture == 1; //강의 들음 표시
+				      cur_player[player].flag_graduate = 1; // 졸업했음을 표시 
                       //수강 후 완료메세지 출력  
                       printf("The lecture has been completed!! Thank you for your hard work!\n");
                      
@@ -172,21 +172,29 @@ void actionNode(int player)
                     {
                       printf("You dropped this lecture.\n");
                     }
+                }
+            
 			   
-			}
-            else
+		
+            else if (cur_player[player].energy < smmObj_getNodeEnergy(boardPtr))
 			printf("Current energy is not enough. Take this lecture next time.\n"); //에너지가 부족해 들을 수 없을 때 출력  
+			
+			else
+			printf("You already took this lecture.\n");
 			      
             break;
         
         
 		//case laboratory:
 	    case SMMNODE_TYPE_LABORATORY:
-		   if
+			    
 		   (cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr)); //실험실에서는 에너지가 사용됨 
 		   
 		   break;
 		
+		
+	
+	
 		//case restaurant:
 	    case SMMNODE_TYPE_RESTAURANT:
 		   if
@@ -202,12 +210,17 @@ void actionNode(int player)
 		   break;
 		   
 		//case gotolab:
-		case SMMNODE_TYPE_GOTOLAB:
-		    if 
-			(cur_player[player].position = 8); //전자공학실험실, position 8 로 이동
+		case SMMNODE_TYPE_GOTOLAB: {
+			
+			int experimentTh = rand()%MAX_DIE + 1; // 실험 성공 기준값을 랜덤하게 정함
+            printf("Experiment success threshold value: %d\n", experimentTh);  //실험 성공 기준값을 출력
+				
+			cur_player[player].position = 8; //전자공학실험실, position 8 로 이동
 		    printf("It is 실험시간. %s go to node %i, 전자공학실험실.\n", cur_player[player].name, cur_player[player].position); //실험실로 이동했다는 메세지 출력
-    
-		   break; 
+		    
+			break;
+		}
+			
 		
 		//case foodchance:
 		case SMMNODE_TYPE_FOODCHANCE: 
@@ -404,7 +417,7 @@ int main(int argc, const char * argv[]) {
     
   
     //3. SM Marble game starts ---------------------------------------------------------------------------------
-    while (1) //is anybody graduated?
+    while (isGraduated() == -1) // isGraduated()코드에서 졸업한 학생이 없으면 -1을 출력하게 했으므로  
     {
         int die_result;
         
@@ -424,9 +437,9 @@ int main(int argc, const char * argv[]) {
         turn = (turn + 1)%player_nr;    
     }
     
-    //4. SM Marble game ends -----------------------------------------------------------------------------------
     
     free(cur_player);
     system("PAUSE");
     return 0;
 }
+
