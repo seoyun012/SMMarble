@@ -22,14 +22,18 @@ static int festival_nr;
 
 static int player_nr;
 
+
 typedef struct player {
    int energy;
    int position;
    char name[MAX_CHARNAME];
    int accumCredit;
    int flag_graduate;
-   int hasTakenLecture; //이전에 강의 들은 적 있는지 체크  
+   int hasTakenLecture; //이전에 강의 들은 적 있는지 체크하는 상태 변수  
+   int experimentTime; //실험 중인지 체크하는 상태 변수  
+   int experimentTh; // 실험 성공 기준값 저장 변수  
 } player_t;
+
 
 static player_t *cur_player;
 //static player_t cur_player[MAX_PLAYER]
@@ -57,8 +61,10 @@ int isGraduated(void)  //check if any player is graduated
         if (cur_player[i].accumCredit >= GRADUATE_CREDIT && cur_player[i].position == 0)
         
         {
-            printf("%s is graduated! Congratulations!\n", cur_player[i].name); // 졸업한 플레이어 축하 메세지 출력 
-            printf("%s's total credit : %s\n", cur_player[i].name, cur_player[i].accumCredit); // 졸업한 플레이어의 총 학점, 들은 강의, 성적 출력  
+            printf("%s is graduated! Congratulations!\n" , cur_player[i].name); // 게임 종료 후 졸업한 플레이어 축하 메세지 출력 
+            printf("%s's total credit : %s\n", cur_player[i].name, cur_player[i].accumCredit); //졸업한 플레이어의 총 학점 출력 
+            printf("Game Over!");
+			
             cur_player[i].flag_graduate = 1; //졸업한 플레이어의 flag_graduate 설정
 			return i; // i를 반환  
         }
@@ -113,6 +119,8 @@ void generatePlayers(int n, int initEnergy) //generate a new player
       cur_player[i].accumCredit = 0;
       cur_player[i].flag_graduate =0;
       cur_player[i].hasTakenLecture =0; //강의 들은 적 없는 것으로 초기화  
+      cur_player[i].experimentTime =0; //실험 중이 아닌 것으로 초기화 
+      cur_player[i].experimentTh = rand()%MAX_DIE + 1; // 실험 성공 기준값 초기화
    }
    
 }
@@ -159,7 +167,7 @@ void actionNode(int player)
                       cur_player[player].accumCredit += smmObj_getNodeCredit(boardPtr); //학점은 들은 수강과목 학점만큼 쌓임  
                       cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr); //수강하면서 에너지는 소모됨  
                       cur_player[player].hasTakenLecture == 1; //강의 들음 표시
-				      cur_player[player].flag_graduate = 1; // 졸업했음을 표시 
+				      
                       //수강 후 완료메세지 출력  
                       printf("The lecture has been completed!! Thank you for your hard work!\n");
                      
@@ -186,15 +194,25 @@ void actionNode(int player)
         
         
 		//case laboratory:
-	    case SMMNODE_TYPE_LABORATORY:
-			    
-		   (cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr)); //실험실에서는 에너지가 사용됨 
-		   
-		   break;
-		
-		
-	
-	
+	    case SMMNODE_TYPE_LABORATORY: {
+	    	printf("ExperimentTime: %d\n", cur_player[player].experimentTime);
+	    	 
+	    	int die_result = rolldie(player); //주사위 굴리고 결과 저장  
+	    	 
+	    	if (cur_player[player].experimentTime == 1) //실험 중이라면
+	    	{
+	    		if (die_result >= cur_player[player].experimentTh) //실험 성공이면
+				    (cur_player[player].energy -= smmObj_getNodeEnergy(boardPtr)); //실험실에서는 에너지가 사용되고, 바로 이동 
+				
+				else
+				    cur_player[player].position = 8; //실험실노드에 그대로 위치  
+			}
+			else //실험 중이 아니라면 에너지도 깎이지 않고 바로 이동도 가능  
+		       	
+			break;
+		}
+
+
 		//case restaurant:
 	    case SMMNODE_TYPE_RESTAURANT:
 		   if
@@ -212,11 +230,12 @@ void actionNode(int player)
 		//case gotolab:
 		case SMMNODE_TYPE_GOTOLAB: {
 			
-			int experimentTh = rand()%MAX_DIE + 1; // 실험 성공 기준값을 랜덤하게 정함
-            printf("Experiment success threshold value: %d\n", experimentTh);  //실험 성공 기준값을 출력
+            printf("Experiment success threshold value: %d\n", cur_player[player].experimentTh);  //실험 성공 기준값을 출력
+            
+            cur_player[player].experimentTime = 1; //실험 중 상태로 변경 
 				
 			cur_player[player].position = 8; //전자공학실험실, position 8 로 이동
-		    printf("It is 실험시간. %s go to node %i, 전자공학실험실.\n", cur_player[player].name, cur_player[player].position); //실험실로 이동했다는 메세지 출력
+		    printf("It is 실험시간. %s go to node %i, 전자공학실험실.\n", cur_player[player].name, cur_player[player].position); //실험실로 이동했다는 메세지 출력  
 		    
 			break;
 		}
