@@ -195,7 +195,6 @@ void actionNode(int player)
         
 		//case laboratory:
 	    case SMMNODE_TYPE_LABORATORY: {
-	    	printf("ExperimentTime: %d\n", cur_player[player].experimentTime);
 	    	 
 	    	int die_result = rolldie(player); //주사위 굴리고 결과 저장  
 	    	 
